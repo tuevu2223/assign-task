@@ -3,6 +3,9 @@ import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
 import authRouter from "./routes/auth.route.js";
+import userRouter from "./routes/user.route.js";
+import taskRouter from "./routes/task.route.js";
+import { errorHandler } from "./middlewares/error.middleware.js";
 
 const app = express();
 
@@ -16,13 +19,12 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use(authRouter);
 
-app.use((err, req, res, next) => {
-  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-    return res.status(400).json({ message: "Invalid JSON body." });
-  }
-  return next(err);
-});
+app.use(authRouter);
+app.use(userRouter);
+app.use(taskRouter);
+
+// Global Error Handler
+app.use(errorHandler);
 
 export default app;

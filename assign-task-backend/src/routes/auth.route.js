@@ -1,14 +1,17 @@
-import { Router } from "express";
-import { login, signup } from "../controllers/auth.controller.js";
+import express from "express";
+import { register, login, getMe } from "../controllers/auth.controller.js";
+import { validate } from "../middlewares/validate.middleware.js";
+import { registerSchema, loginSchema } from "../utils/validators.js";
+import { verifyToken } from "../middlewares/auth.middleware.js";
 
-const router = Router();
+const router = express.Router();
 
 /**
- * @openapi
- * /signup:
+ * @swagger
+ * /auth/register:
  *   post:
- *     summary: Register a new user.
- *     description: Register a new user with full name, email, and password.
+ *     summary: Register a new user
+ *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
@@ -22,27 +25,29 @@ const router = Router();
  *             properties:
  *               fullName:
  *                 type: string
- *                 example: John Doe
  *               email:
  *                 type: string
- *                 example: user@example.com
+ *                 format: email
  *               password:
  *                 type: string
- *                 example: yourpassword
+ *                 format: password
+ *               role:
+ *                 type: string
+ *                 enum: [ADMIN, MANAGER, USER]
  *     responses:
  *       201:
- *         description: User registered successfully.
+ *         description: User created successfully
  *       400:
- *         description: Bad request.
+ *         description: Invalid input or user already exists
  */
-router.post("/signup", signup);
+router.post("/auth/register", validate(registerSchema), register);
 
 /**
- * @openapi
- * /login:
+ * @swagger
+ * /auth/login:
  *   post:
- *     summary: Login a user.
- *     description: Authenticate a user with email and password.
+ *     summary: Login user
+ *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
@@ -55,27 +60,32 @@ router.post("/signup", signup);
  *             properties:
  *               email:
  *                 type: string
- *                 example: user@example.com
+ *                 format: email
  *               password:
  *                 type: string
- *                 example: yourpassword
+ *                 format: password
  *     responses:
  *       200:
- *         description: Login successfully and return access/refresh tokens.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 accessToken:
- *                   type: string
- *                   example: your-access-token
- *                 refreshToken:
- *                   type: string
- *                   example: your-refresh-token
- *       400:
- *         description: Invalid credentials or account banned.
+ *         description: Login successful, returns tokens
+ *       401:
+ *         description: Invalid credentials
  */
-router.post("/login", login);
+router.post("/auth/login", validate(loginSchema), login);
+
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Get current logged in user details
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful operation
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/auth/me", verifyToken, getMe);
 
 export default router;

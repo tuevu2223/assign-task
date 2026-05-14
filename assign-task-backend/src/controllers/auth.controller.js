@@ -1,40 +1,107 @@
-import { createUser, loginWithPassword } from "../services/auth.service.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import User from "../models/user.model.js";
 
-export const signup = async (req, res) => {
+// Generate Access Token
+const generateAccessToken = (id) => {
+  return jwt.sign({ id }, process.env.ACCESS_TOKEN_SECRET || "replace-with-strong-access-secret", {
+    expiresIn: "1h",
+  });
+};
+
+// Generate Refresh Token
+const generateRefreshToken = (id) => {
+  return jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET || "replace-with-strong-refresh-secret", {
+    expiresIn: "7d",
+  });
+};
+
+/**
+ * Register a new user
+ */
+export const register = async (req, res, next) => {
   try {
-    const { fullName, email, password } = req.body ?? {};
-    await createUser({ fullName, email, password });
-    return res.status(201).json({
-      message: "User registered successfully.",
+    const { fullName, email, password, role } = req.body;
+
+    // Check if user already exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ success: false, message: "User already exists" });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create user
+    const user = await User.create({
+      fullName,
+      email,
+      password: hashedPassword,
+      role: role || "USER",
     });
-  } catch (err) {
-    if (err.code === 11000 || err.code === "EMAIL_IN_USE") {
-      return res.status(400).json({ message: "Bad request." });
+
+    if (user) {
+      res.status(201).json({
+        success: true,
+        message: "Registration successful. Please login.",
+      });
+    } else {
+      res.status(400).json({ success: false, message: "Invalid user data" });
     }
-    if (
-      err.code === "INVALID_INPUT" ||
-      err.code === "INVALID_EMAIL" ||
-      err.code === "WEAK_PASSWORD"
-    ) {
-      return res.status(400).json({ message: "Bad request." });
-    }
-    console.error(err);
-    return res.status(400).json({ message: "Bad request." });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const login = async (req, res) => {
+/**
+ * Login user
+ */
+export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body ?? {};
-    const tokens = await loginWithPassword({ email, password });
-    return res.status(200).json(tokens);
-  } catch (err) {
-    if (err.code === "INVALID_CREDENTIALS") {
-      return res.status(400).json({
-        message: "Invalid credentials or account banned.",
+    const { email, password } = req.body;
+
+    // Find user
+    const user = await User.findOne({ email });
+
+    // Check password
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const accessToken = generateAccessToken(user._id);
+      const refreshToken = generateRefreshToken(user._id);
+
+      res.json({
+        success: true,
+        accessToken,
+        refreshToken,
+        data: {
+          _id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+        },
       });
+    } else {
+      res.status(401).json({ success: false, message: "Invalid email or password" });
     }
-    console.error(err);
-    return res.status(500).json({ message: "Internal server error." });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get current user
+ */
+export const getMe = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    res.json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    next(error);
   }
 };

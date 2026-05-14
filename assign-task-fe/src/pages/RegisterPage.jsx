@@ -1,4 +1,6 @@
+import { ROLE_USER } from "@/common/const";
 import FormField from "@/components/FormField";
+import SelectInput from "@/components/FormInputs/SelectInput";
 import InputType from "@/components/FormInputs/TextInput";
 import { open } from "@/redux/slices/snackBarSlice";
 import { useRegisterMutation } from "@/services/rootApi";
@@ -16,12 +18,13 @@ function RegisterPage() {
   const dispatch = useDispatch();
 
   const formSchema = yup.object().shape({
-    fullName: yup.string().required(),
+    fullName: yup.string().min(2).required(),
     email: yup
       .string()
       .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email is not valid")
       .required(),
     password: yup.string().required(),
+    role: yup.string().default(ROLE_USER[0].value).required("Role is required"),
   });
 
   const {
@@ -40,10 +43,12 @@ function RegisterPage() {
 
   useEffect(() => {
     if (isSuccess) {
-      dispatch(open({ message: data?.message, type: 'success' }));
+      dispatch(open({ message: data?.message, type: "success" }));
       navigate("/login");
     } else if (isError) {
-      dispatch(open({ message: error?.data?.message || 'Lỗi đăng ký', type: "error" }));
+      dispatch(
+        open({ message: error?.data?.message || "Lỗi đăng ký", type: "error" }),
+      );
     }
   }, [isSuccess, isError, data, error, dispatch, navigate]);
 
@@ -78,7 +83,20 @@ function RegisterPage() {
           type="password"
           error={errors["password"]?.message}
         />
-        <Button type="primary" htmlType="submit" loading={isLoading} size="large">
+        <FormField
+          label="Role"
+          // placeholder={"Vu Van Tue"}
+          name="role"
+          Component={SelectInput}
+          control={control}
+          error={errors["role"]?.message}
+        />
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={isLoading}
+          size="large"
+        >
           Sign Up
         </Button>
         <p>
