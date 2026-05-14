@@ -1,4 +1,3 @@
-import Loading from "@/Loading";
 import {
   BellOutlined,
   CheckSquareOutlined,
@@ -9,8 +8,7 @@ import {
   UsergroupAddOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, theme } from "antd";
-import { Suspense } from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Route, Routes, useNavigate } from "react-router-dom";
 const { Header, Content, Footer, Sider } = Layout;
 const navItems = [
   {
@@ -93,16 +91,13 @@ const HomePage = () => {
             />
           </Sider>
           <Content style={{ padding: "0 24px", minHeight: 280 }}>
-            <Suspense fallback={<Loading />}>
-              <Outlet />
-            </Suspense>
-            {/* <Routes> 
+            <Routes> 
               <Route path="/dashboard" element={<p>home</p>} />
               <Route path="/tasks" element={<p>home</p>} />
               <Route path="/my-task" element={<p>home</p>} />
               <Route path="/members" element={<p>home</p>} />
               <Route path="/setting" element={<p>task</p>} />
-            </Routes> */}
+            </Routes>
           </Content>
         </Layout>
       </div>
@@ -113,3 +108,53 @@ const HomePage = () => {
   );
 };
 export default HomePage;
+// import { Layout, Menu } from "antd";
+// import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+
+// import { useEffect } from "react";
+// // import Tasks from "./Tasks";
+
+// const { Sider, Content } = Layout;
+
+// function HomePage() {
+//   useEffect(() => {
+//     fetch("http://localhost:5000")
+//       .then((res) => res.json())
+//       .then((data) => {
+//         console.log(data);
+//       });
+//   }, []);
+
+//   return (
+//     <div className="">
+//       <BrowserRouter>
+//         <Layout style={{ minHeight: "100vh" }}>
+//           <Sider>
+//             <Menu
+//               theme="dark"
+//               items={[
+//                 {
+//                   key: "1",
+//                   label: <Link to="/">Dashboard</Link>,
+//                 },
+//                 {
+//                   key: "2",
+//                   label: <Link to="/tasks">Tasks</Link>,
+//                 },
+//               ]}
+//             />
+//           </Sider>
+
+//           <Content style={{ padding: 20 }}>
+//             <Routes>
+//               <Route path="/" element={<p>home</p>} />
+//               <Route path="/tasks" element={<p>task</p>} />
+//             </Routes>
+//           </Content>
+//         </Layout>
+//       </BrowserRouter>
+//     </div>
+//   );
+// }
+
+// export default HomePage;

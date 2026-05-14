@@ -1,6 +1,7 @@
 import FormField from "@/components/FormField";
 import InputType from "@/components/FormInputs/TextInput";
 import { setTokens } from "@/redux/slices/authSlice";
+import { setRole } from "@/redux/slices/roleSlice";
 import { open } from "@/redux/slices/snackBarSlice";
 import { useLoginMutation } from "@/services/rootApi";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -51,17 +52,23 @@ function LoginPage() {
   }, [isSuccess, data, dispatch]);
 
   const onSubmit = (formData) => {
-    console.log({ formData });
 
     login(formData);
   };
 
   useEffect(() => {
     if (isSuccess) {
-      dispatch(open({ message: 'Đăng nhập thành công', type: 'success' }));
+      dispatch(open({ message: "Đăng nhập thành công", type: "success" }));
+
+      dispatch(setRole({ role: data.data.role }));
       navigate("/");
     } else if (isError) {
-      dispatch(open({ message: isError?.data?.message || 'Lỗi đăng nhập', type: "error" }));
+      dispatch(
+        open({
+          message: isError?.data?.message || "Lỗi đăng nhập",
+          type: "error",
+        }),
+      );
     }
   }, [isSuccess, isError, dispatch, navigate, isError]);
 
@@ -88,7 +95,12 @@ function LoginPage() {
           type="password"
           error={errors["password"]?.message}
         />
-        <Button type="primary" htmlType="submit" loading={isLoading} size="large">
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={isLoading}
+          size="large"
+        >
           Sign In
         </Button>
       </div>
