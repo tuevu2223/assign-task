@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "baseUrl": ".", 
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "ignoreDeprecations": "5.0"
+  },
+  "include": ["src", "prettier.config.js"],
+  "exclude": ["node_modules"]
+}
