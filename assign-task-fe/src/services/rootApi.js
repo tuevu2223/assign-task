@@ -6,10 +6,10 @@ export const rootApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   endpoints: (build) => ({
     register: build.mutation({
-      query: ({ fullName, email, password }) => {
+      query: (body) => {
         return {
-          url: `/signup`,
-          body: { fullName, email, password },
+          url: `auth/register`,
+          body: body,
           method: "POST",
         };
       },
@@ -17,7 +17,7 @@ export const rootApi = createApi({
     login: build.mutation({
       query: ({ email, password }) => {
         return {
-          url: `/login`,
+          url: `auth/login`,
           body: { email, password },
           method: "POST",
         };
