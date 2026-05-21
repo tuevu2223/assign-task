@@ -70,8 +70,20 @@ export const assignTaskSchema = z.object({
   }),
 });
 
+export const updateMyTaskStatusSchema = z.object({
+  body: z.object({
+    taskId: z.string({ required_error: "Task ID is required" }).refine(objectIdRefinement, {
+      message: "Invalid Task ID format",
+    }),
+    status: z.enum(["TODO", "IN_PROGRESS", "DONE"], {
+      required_error: "Status is required",
+    }),
+  }),
+});
+
 export const objectIdParamSchema = z.object({
   params: z.object({
     id: z.string().refine(objectIdRefinement, { message: "Invalid ID format" }),
   }),
 });
+

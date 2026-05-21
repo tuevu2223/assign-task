@@ -47,6 +47,34 @@ export const getTasks = async (req, res, next) => {
   }
 };
 
+export const getMyTasks = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { status, priority, search } = req.query;
+    let query = { assignedTo: userId };
+
+    if (status) query.status = status;
+    if (priority) query.priority = priority;
+    if (search) {
+      query.title = { $regex: search, $options: "i" };
+    }
+
+    const tasks = await Task.find(query)
+      .populate("createdBy", "fullName email")
+      .populate("assignedTo", "fullName email")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: tasks.length,
+      data: tasks,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 export const getTaskById = async (req, res, next) => {
   try {
     const task = await Task.findById(req.params.id)
@@ -82,7 +110,7 @@ export const createTask = async (req, res, next) => {
   try {
     const { title, description, status, priority, assignedTo } = req.body;
 
-    const task = await Task.create({
+    let task = await Task.create({
       title,
       description,
       status,
@@ -90,6 +118,12 @@ export const createTask = async (req, res, next) => {
       assignedTo,
       createdBy: req.user._id,
     });
+
+    // Populate for a better response
+    task = await task.populate([
+      { path: "createdBy", select: "fullName email" },
+      { path: "assignedTo", select: "fullName email" }
+    ]);
 
     res.status(201).json({ success: true, data: task });
   } catch (error) {
@@ -174,6 +208,37 @@ export const updateTaskStatus = async (req, res, next) => {
 
     task.status = req.body.status;
     await task.save();
+
+    res.json({ success: true, data: task });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateMyTaskStatus = async (req, res, next) => {
+  try {
+    const { taskId, status } = req.body;
+    const userId = req.user._id;
+
+    let task = await Task.findById(taskId);
+
+    if (!task) {
+      return res.status(404).json({ success: false, message: "Task not found" });
+    }
+
+    // Verify the task is assigned to the authenticated user
+    if (task.assignedTo.toString() !== userId.toString()) {
+      return res.status(403).json({ success: false, message: "Forbidden: You can only update status of your own tasks" });
+    }
+
+    task.status = status;
+    await task.save();
+
+    // Populate for response consistency
+    task = await task.populate([
+      { path: "createdBy", select: "fullName email" },
+      { path: "assignedTo", select: "fullName email" }
+    ]);
 
     res.json({ success: true, data: task });
   } catch (error) {

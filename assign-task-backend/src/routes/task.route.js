@@ -1,11 +1,13 @@
 import express from "express";
 import {
   getTasks,
+  getMyTasks,
   getTaskById,
   createTask,
   updateTask,
   deleteTask,
   updateTaskStatus,
+  updateMyTaskStatus,
   assignTask,
 } from "../controllers/task.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
@@ -15,6 +17,7 @@ import {
   createTaskSchema,
   updateTaskSchema,
   updateTaskStatusSchema,
+  updateMyTaskStatusSchema,
   assignTaskSchema,
   objectIdParamSchema,
 } from "../utils/validators.js";
@@ -56,7 +59,80 @@ router.use(verifyToken);
  *       200:
  *         description: List of tasks
  */
-router.get("/tasks", getTasks);
+router.get("/tasks", authorizeRoles("ADMIN", "MANAGER", "USER"), getTasks);
+
+/**
+ * @swagger
+ * /tasks/my-tasks:
+ *   get:
+ *     summary: Get tasks assigned to the currently authenticated user
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [TODO, IN_PROGRESS, DONE]
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [LOW, MEDIUM, HIGH]
+ *       - in: query
+ *         name: search
+ *         description: Search by title
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of tasks assigned to the user
+ */
+router.get("/tasks/my-tasks", authorizeRoles("ADMIN", "MANAGER", "USER"), getMyTasks);
+
+/**
+ * @swagger
+ * /tasks/my-tasks/status:
+ *   patch:
+ *     summary: Update status of a task assigned to the currently authenticated user
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - taskId
+ *               - status
+ *             properties:
+ *               taskId:
+ *                 type: string
+ *                 description: Task ID
+ *               status:
+ *                 type: string
+ *                 enum: [TODO, IN_PROGRESS, DONE]
+ *                 description: New status of the task
+ *     responses:
+ *       200:
+ *         description: Task status updated successfully
+ *       400:
+ *         description: Invalid input data
+ *       403:
+ *         description: Forbidden - Task not assigned to the user
+ *       404:
+ *         description: Task not found
+ */
+router.patch(
+  "/tasks/my-tasks/status",
+  authorizeRoles("ADMIN", "MANAGER", "USER"),
+  validate(updateMyTaskStatusSchema),
+  updateMyTaskStatus
+);
+
 
 /**
  * @swagger
