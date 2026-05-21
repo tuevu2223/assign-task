@@ -1,76 +1,44 @@
+import HeaderApp from "@/components/Home/HeaderApp";
+import Sidebar from "@/components/Home/Sidebar";
 import Loading from "@/Loading";
-import {
-  BellOutlined,
-  CheckSquareOutlined,
-  DashboardOutlined,
-  PlusOutlined,
-  ScheduleOutlined,
-  SettingOutlined,
-  UsergroupAddOutlined,
-} from "@ant-design/icons";
-import { Layout, Menu, theme } from "antd";
-import { Suspense } from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { close, open } from "@/redux/slices/snackBarSlice";
+import "@fontsource-variable/public-sans/wght.css";
+import { message as antdMessage, Layout, theme } from "antd";
+import { Suspense, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Outlet } from "react-router-dom";
 const { Header, Content, Footer, Sider } = Layout;
-const navItems = [
-  {
-    key: "createTask",
-    icon: <PlusOutlined />,
-    label: <Link to={"/create"}>Create Task</Link>,
-  },
-  {
-    key: "notify",
-    icon: <BellOutlined />,
-    label: <Link to={"/notify"}>Notify</Link>,
-  },
-];
-const sidebarItems = [
-  {
-    key: "/dashboard",
-    icon: <DashboardOutlined />,
-    label: "Dashboard",
-  },
-  {
-    key: "/tasks",
-    icon: <CheckSquareOutlined />,
-    label: "Tasks",
-  },
-  {
-    key: "/my-tasks",
-    icon: <ScheduleOutlined />,
-    label: "My Tasks",
-  },
-  {
-    key: "/members",
-    icon: <UsergroupAddOutlined />,
-    label: "Members",
-  },
-  {
-    key: "/setting",
-    icon: <SettingOutlined />,
-    label: "Setting",
-  },
-];
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   const currentYear = new Date().getFullYear();
 
+  const dispatch = useDispatch();
+
+  const { isOpen, message, type } = useSelector((state) => state.snackBar);
+
+  console.log({ open, isOpen });
+  const handleClose = () => {
+    dispatch(close());
+  };
+
+  useEffect(() => {
+    if (isOpen && message) {
+      const msgType = type || "info"; // default to info
+      if (antdMessage[msgType]) {
+        antdMessage[msgType](message);
+      } else {
+        antdMessage.info(message);
+      }
+      handleClose();  
+    }
+  }, [isOpen, message, type, dispatch]);
+
   return (
     <Layout>
-      <Header style={{ display: "flex", alignItems: "center" }}>
-        <div className="demo-logo" />
-        <Menu
-          theme="dark"
-          mode="horizontal"
-          // defaultSelectedKeys={["2"]}
-          items={navItems}
-          style={{ flex: 1, minWidth: 0 }}
-        />
-      </Header>
+      <HeaderApp />
       <div style={{ padding: "0 48px" }}>
         {/* <Breadcrumb
           style={{ margin: "16px 0" }}
@@ -83,15 +51,8 @@ const HomePage = () => {
             borderRadius: borderRadiusLG,
           }}
         >
-          <Sider style={{ background: colorBgContainer }} width={200}>
-            <Menu
-              mode="inline"
-              defaultSelectedKeys={["/"]}
-              style={{ height: "100%" }}
-              items={sidebarItems}
-              onClick={(e) => navigate(e.key)}
-            />
-          </Sider>
+          <Sidebar />
+
           <Content style={{ padding: "0 24px", minHeight: 280 }}>
             <Suspense fallback={<Loading />}>
               <Outlet />

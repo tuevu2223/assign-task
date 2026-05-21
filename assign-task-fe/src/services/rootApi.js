@@ -3,7 +3,20 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // Define a service using a base URL and expected endpoints
 export const rootApi = createApi({
   reducerPath: "rootApi",
-  baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
+  tagTypes: ["my-tasks"],
+  baseQuery: fetchBaseQuery({
+    baseUrl: import.meta.env.VITE_BASE_URL,
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState().auth.accessToken;
+
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+
+      console.log({ token, getState: getState() });
+      return headers;
+    },
+  }),
   endpoints: (build) => ({
     register: build.mutation({
       query: (body) => {
@@ -23,9 +36,62 @@ export const rootApi = createApi({
         };
       },
     }),
+    getAuthUser: build.query({
+      query: () => "/auth-user",
+    }),
+    createTask: build.mutation({
+      query: ({ title, description, status, priority, assignedTo }) => {
+        return {
+          url: `/tasks`,
+          body: {
+            title,
+            description,
+            status,
+            priority,
+            assignedTo,
+          },
+          method: "POST",
+        };
+      },
+    }),
+    getAllUser: build.query({
+      query: () => "/users",
+    }),
+    getAllTask: build.query({
+      query: () => "/tasks",
+    }),
+    getMyTasks: build.query({
+      query: (params) => ({
+        url: "/tasks/my-tasks",
+        params,
+      }),
+      providesTags: ["my-tasks"],
+    }),
+    updateMyStatusTask: build.mutation({
+      query: ({ taskId, status }) => {
+        return {
+          url: `/tasks/my-tasks/status`,
+          body: {
+            taskId,
+            status,
+          },
+          method: "PATCH",
+        };
+      },
+      invalidatesTags: ["my-tasks"],
+    }),
   }),
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useRegisterMutation, useLoginMutation } = rootApi;
+export const {
+  useRegisterMutation,
+  useLoginMutation,
+  useGetAuthUserQuery,
+  useCreateTaskMutation,
+  useUpdateMyStatusTaskMutation,
+  useGetAllUserQuery,
+  useGetAllTaskQuery,
+  useGetMyTasksQuery,
+} = rootApi;

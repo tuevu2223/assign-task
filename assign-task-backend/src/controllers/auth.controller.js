@@ -105,3 +105,27 @@ export const getMe = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Get authenticated user (via Bearer token validation)
+ */
+export const getAuthUser = async (req, res, next) => {
+  try {
+    // req.user is already set and verified by verifyToken middleware
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    res.status(200).json({
+      success: true,
+      data: {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

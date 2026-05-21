@@ -88,6 +88,7 @@ function RegisterPage() {
           // placeholder={"Vu Van Tue"}
           name="role"
           Component={SelectInput}
+          options={ROLE_USER}
           control={control}
           error={errors["role"]?.message}
         />

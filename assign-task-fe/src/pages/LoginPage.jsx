@@ -3,7 +3,7 @@ import InputType from "@/components/FormInputs/TextInput";
 import { setTokens } from "@/redux/slices/authSlice";
 import { setRole } from "@/redux/slices/roleSlice";
 import { open } from "@/redux/slices/snackBarSlice";
-import { useLoginMutation } from "@/services/rootApi";
+import { useLoginMutation, rootApi } from "@/services/rootApi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button } from "antd";
 import { useEffect } from "react";
@@ -41,6 +41,8 @@ function LoginPage() {
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
       });
+
+      dispatch(rootApi.util.resetApiState());
 
       dispatch(
         setTokens({

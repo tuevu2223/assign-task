@@ -1,17 +1,16 @@
-import { ROLE_USER } from "@/common/const";
 import { Select } from "antd";
 
-function SelectInput({ onChange, value, error }) {
+function SelectInput({ onChange, value, error, options }) {
   console.log({ value });
 
   return (
     <div className="">
       <Select
         value={value}
-        defaultValue={ROLE_USER[0].value}
-        style={{ width: '100%' }}
+        defaultValue={options[0]?.value}
+        style={{ width: "100%" }}
         onChange={onChange}
-        options={ROLE_USER}
+        options={options}
         status={error ? "error" : ""}
       />
     </div>
