@@ -141,6 +141,13 @@ const MytaskPage = () => {
       },
     },
     {
+      title: "Deadline",
+      dataIndex: "deadline",
+      render: (text) => {
+        return text;
+      },
+    },
+    {
       title: "operation",
       dataIndex: "operation",
       render: (_, record) => {

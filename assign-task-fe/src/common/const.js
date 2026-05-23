@@ -10,16 +10,17 @@ export const STATUS_TASK = [
   { label: "Done", value: "DONE" },
 ];
 
-export const PRIORITY_TASK   = [
+export const PRIORITY_TASK = [
   { label: "Low", value: "LOW" },
   { label: "Medium", value: "MEDIUM" },
   { label: "High", value: "HIGH" },
 ];
- 
+
 export const DEFAULT_CREATE_TASK_FORM_FIELDS_SYNCH = {
   title: "",
   description: "",
   status: STATUS_TASK[0].value,
   priority: PRIORITY_TASK[0].value,
+  deadline: "",
   // assignedTo: assignedToOptions[0]?.value || "",
 };

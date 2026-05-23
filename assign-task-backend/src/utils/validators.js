@@ -30,6 +30,8 @@ export const createTaskSchema = z.object({
     assignedTo: z.string({ required_error: "assignedTo is required" }).refine(objectIdRefinement, {
       message: "Invalid assignedTo ObjectId",
     }),
+    // Deadline (ISO date string) when the task must be completed
+    deadline: z.string({ required_error: "deadline is required" }).refine((val) => !isNaN(Date.parse(val)), { message: "Invalid deadline date" }),
   }),
 });
 
@@ -45,6 +47,8 @@ export const updateTaskSchema = z.object({
     assignedTo: z.string().refine(objectIdRefinement, {
       message: "Invalid assignedTo ObjectId",
     }).optional(),
+    // Optional deadline for the task (ISO date string)
+    deadline: z.string().optional().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid deadline date" }).optional(),
   }),
 });
 
