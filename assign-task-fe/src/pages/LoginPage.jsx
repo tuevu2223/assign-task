@@ -3,7 +3,7 @@ import InputType from "@/components/FormInputs/TextInput";
 import { setTokens } from "@/redux/slices/authSlice";
 import { setRole } from "@/redux/slices/roleSlice";
 import { open } from "@/redux/slices/snackBarSlice";
-import { useLoginMutation, rootApi } from "@/services/rootApi";
+import { rootApi, useLoginMutation } from "@/services/rootApi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button } from "antd";
 import { useEffect } from "react";
@@ -11,7 +11,7 @@ import { useForm } from "react-hook-form";
 // import { login } from "@/redux/slices/snackBarSlice";
 
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 
 function LoginPage() {
@@ -54,7 +54,6 @@ function LoginPage() {
   }, [isSuccess, data, dispatch]);
 
   const onSubmit = (formData) => {
-
     login(formData);
   };
 
@@ -105,6 +104,10 @@ function LoginPage() {
         >
           Sign In
         </Button>
+        <p></p>
+        <p>
+          Already have an account? <Link to={"/register"}>Set up</Link>
+        </p>
       </div>
     </form>
   );
