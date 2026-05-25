@@ -8,12 +8,18 @@ import DateTimeInput from "@/components/FormInputs/DateTimeInput";
 import SelectInput from "@/components/FormInputs/SelectInput";
 import InputType from "@/components/FormInputs/TextInput";
 import { open } from "@/redux/slices/snackBarSlice";
-import { useCreateTaskMutation, useGetAllUserQuery } from "@/services/rootApi";
+import {
+  useGetAllUserQuery,
+  useGetTaskByIdQuery,
+  useUpdateTaskMutation,
+} from "@/services/rootApi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button } from "antd";
+import dayjs from "dayjs";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
+import { useParams } from "react-router-dom";
 // import { login } from "@/redux/slices/snackBarSlice";
 
 import * as yup from "yup";
@@ -35,9 +41,14 @@ const formSchema = yup.object().shape({
   assignedTo: yup.string().required("Please select assigned to"),
 });
 
-function Create() {
-  const [createTask, { data, isLoading, isSuccess, isError }] =
-    useCreateTaskMutation();
+function EditTaskPage() {
+  const { id } = useParams();
+  const { data: resDataGetTaskById } = useGetTaskByIdQuery(id);
+  const dataGetTaskById = resDataGetTaskById?.data;
+  console.log({ dataGetTaskById });
+
+  const [updateTask, { data, isLoading, isSuccess, isError }] =
+    useUpdateTaskMutation();
 
   const { data: resAllUser } = useGetAllUserQuery();
   const allUser = resAllUser?.data;
@@ -67,21 +78,27 @@ function Create() {
   });
 
   useEffect(() => {
-    if (allUser) {
+    if (dataGetTaskById) {
       reset({
-        ...DEFAULT_CREATE_TASK_FORM_FIELDS_SYNCH,
-        assignedTo: assignedToOptions[0]?.value,
+        title: dataGetTaskById.title,
+        description: dataGetTaskById.description,
+        status: dataGetTaskById.status,
+        priority: dataGetTaskById.priority,
+        assignedTo: dataGetTaskById.assignedTo._id,
+        deadline: dataGetTaskById?.deadline
+          ? dayjs(dataGetTaskById.deadline)
+          : "",
       });
     }
-  }, [allUser]);
+  }, [dataGetTaskById]);
 
   useEffect(() => {
     if (isSuccess) {
-      dispatch(open({ message: "Tạo task thành công", type: "success" }));
+      dispatch(open({ message: "Sửa task thành công", type: "success" }));
     } else if (isError) {
       dispatch(
         open({
-          message: isError?.data?.message || "Tạo task thất bại",
+          message: isError?.data?.message || "Sửa task thất bại",
           type: "error",
         }),
       );
@@ -90,7 +107,7 @@ function Create() {
 
   const onSubmit = (formData) => {
     console.log("formData:", formData);
-    createTask(formData);
+    updateTask({ ...formData, taskId: id });
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -151,11 +168,11 @@ function Create() {
           loading={isLoading}
           size="large"
         >
-          Create Task
+          Save
         </Button>
       </div>
     </form>
   );
 }
 
-export default Create;
+export default EditTaskPage;

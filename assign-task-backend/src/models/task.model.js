@@ -17,6 +17,11 @@ const taskSchema = new mongoose.Schema(
       enum: ["TODO", "IN_PROGRESS", "DONE"],
       default: "TODO",
     },
+    // Deadline by which the task should be completed
+    deadline: {
+      type: Date,
+      required: true,
+    },
     priority: {
       type: String,
       enum: ["LOW", "MEDIUM", "HIGH"],

@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // Define a service using a base URL and expected endpoints
 export const rootApi = createApi({
   reducerPath: "rootApi",
-  tagTypes: ["my-tasks"],
+  tagTypes: ["my-tasks", "task-detail", "get-all-task"],
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_BASE_URL,
     prepareHeaders: (headers, { getState }) => {
@@ -40,7 +40,14 @@ export const rootApi = createApi({
       query: () => "/auth-user",
     }),
     createTask: build.mutation({
-      query: ({ title, description, status, priority, assignedTo }) => {
+      query: ({
+        title,
+        description,
+        status,
+        priority,
+        assignedTo,
+        deadline,
+      }) => {
         return {
           url: `/tasks`,
           body: {
@@ -49,6 +56,7 @@ export const rootApi = createApi({
             status,
             priority,
             assignedTo,
+            deadline,
           },
           method: "POST",
         };
@@ -57,8 +65,19 @@ export const rootApi = createApi({
     getAllUser: build.query({
       query: () => "/users",
     }),
+    getTaskById: build.query({
+      query: (id) => {
+        return `/tasks/${id}`;
+      },
+      providesTags: ["task-detail"],
+    }),
     getAllTask: build.query({
       query: () => "/tasks",
+      providesTags: ["get-all-task"],
+    }),
+    getAssignedTask: build.query({
+      query: () => "/tasks/assigned",
+      providesTags: ["get-assigned-task"],
     }),
     getMyTasks: build.query({
       query: (params) => ({
@@ -80,6 +99,31 @@ export const rootApi = createApi({
       },
       invalidatesTags: ["my-tasks"],
     }),
+    updateTask: build.mutation({
+      query: ({
+        taskId,
+        title,
+        description,
+        status,
+        priority,
+        assignedTo,
+        deadline,
+      }) => {
+        return {
+          url: `/tasks/${taskId}`,
+          body: {
+            title,
+            description,
+            status,
+            priority,
+            assignedTo,
+            deadline,
+          },
+          method: "PUT",
+        };
+      },
+      invalidatesTags: ["task-detail", "get-all-task", "get-assigned-task"],
+    }),
   }),
 });
 
@@ -89,9 +133,12 @@ export const {
   useRegisterMutation,
   useLoginMutation,
   useGetAuthUserQuery,
+  useGetTaskByIdQuery,
   useCreateTaskMutation,
   useUpdateMyStatusTaskMutation,
+  useUpdateTaskMutation,
   useGetAllUserQuery,
   useGetAllTaskQuery,
   useGetMyTasksQuery,
+  useGetAssignedTaskQuery,
 } = rootApi;

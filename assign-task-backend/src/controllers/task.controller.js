@@ -52,28 +52,41 @@ export const getMyTasks = async (req, res, next) => {
     const userId = req.user._id;
     const { status, priority, search } = req.query;
     let query = { assignedTo: userId };
-
     if (status) query.status = status;
     if (priority) query.priority = priority;
     if (search) {
       query.title = { $regex: search, $options: "i" };
     }
-
     const tasks = await Task.find(query)
       .populate("createdBy", "fullName email")
       .populate("assignedTo", "fullName email")
       .sort({ createdAt: -1 });
-
-    res.json({
-      success: true,
-      count: tasks.length,
-      data: tasks,
-    });
+    res.json({ success: true, count: tasks.length, data: tasks });
   } catch (error) {
     next(error);
   }
 };
 
+export const getAssignedTasks = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { status, priority, search } = req.query;
+    // Find tasks created by current user and assigned to others
+    let query = { createdBy: userId, assignedTo: { $ne: userId } };
+    if (status) query.status = status;
+    if (priority) query.priority = priority;
+    if (search) {
+      query.title = { $regex: search, $options: "i" };
+    }
+    const tasks = await Task.find(query)
+      .populate("createdBy", "fullName email")
+      .populate("assignedTo", "fullName email")
+      .sort({ createdAt: -1 });
+    res.json({ success: true, count: tasks.length, data: tasks });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getTaskById = async (req, res, next) => {
   try {
@@ -108,7 +121,7 @@ export const getTaskById = async (req, res, next) => {
 
 export const createTask = async (req, res, next) => {
   try {
-    const { title, description, status, priority, assignedTo } = req.body;
+    const { title, description, status, priority, assignedTo, deadline } = req.body;
 
     let task = await Task.create({
       title,
@@ -116,6 +129,7 @@ export const createTask = async (req, res, next) => {
       status,
       priority,
       assignedTo,
+      deadline,
       createdBy: req.user._id,
     });
 

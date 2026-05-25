@@ -1,10 +1,10 @@
 import { formatDateTime } from "@/common/utils/formatDateTime";
-import { useGetAllTaskQuery } from "@/services/rootApi";
+import { useGetAssignedTaskQuery } from "@/services/rootApi";
 import { Table, Typography } from "antd";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
-const TaskPage = () => {
+const AssignedTask = () => {
   const navigate = useNavigate();
 
   const columns = [
@@ -37,8 +37,7 @@ const TaskPage = () => {
       dataIndex: "createdAt",
       sorter: {
         compare: (a, b) =>
-          new Date(a.createdAt).getTime() -
-          new Date(b.createdAt).getTime(),
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         multiple: 1,
       },
     },
@@ -47,8 +46,7 @@ const TaskPage = () => {
       dataIndex: "deadline",
       sorter: {
         compare: (a, b) =>
-          new Date(a.deadline).getTime() -
-          new Date(b.deadline).getTime(),
+          new Date(a.deadline).getTime() - new Date(b.deadline).getTime(),
         multiple: 1,
       },
     },
@@ -56,8 +54,8 @@ const TaskPage = () => {
       title: "Operation",
       dataIndex: "operation",
       render: (_, record) => {
-        console.log({record});
-        
+        console.log({ record });
+
         return (
           <Typography.Link
             onClick={() => {
@@ -71,7 +69,7 @@ const TaskPage = () => {
     },
   ];
 
-  const { data } = useGetAllTaskQuery();
+  const { data } = useGetAssignedTaskQuery();
 
   const dataSource = useMemo(() => {
     const tableData = data?.data.map((i) => ({
@@ -79,18 +77,13 @@ const TaskPage = () => {
       createdBy: i.createdBy.fullName,
       assignedTo: i.assignedTo.fullName,
       createdAt: formatDateTime(i.createdAt),
-      deadline: formatDateTime(i?.deadline)
+      deadline: formatDateTime(i?.deadline),
     }));
 
     return data?.data ? tableData : [];
   }, [data]);
 
-  return (
-    <Table
-      columns={columns}
-      dataSource={dataSource}
-    />
-  );
+  return <Table columns={columns} dataSource={dataSource} />;
 };
 
-export default TaskPage;
+export default AssignedTask;

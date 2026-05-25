@@ -1,6 +1,7 @@
 import {
   CheckSquareOutlined,
   DashboardOutlined,
+  SafetyOutlined,
   ScheduleOutlined,
   SettingOutlined,
   UsergroupAddOutlined,
@@ -43,6 +44,24 @@ function Sidebar() {
       icon: <ScheduleOutlined />,
       label: "My Tasks",
     },
+    ...(role !== "USER"
+      ? [
+          {
+            key: "/assigned-task",
+            icon: <SafetyOutlined />,
+            label: "Assigned Task",
+          },
+        ]
+      : []),
+    ...(role !== "USER"
+      ? [
+          {
+            key: "/tasks",
+            icon: <CheckSquareOutlined />,
+            label: "Tasks",
+          },
+        ]
+      : []),
     ...(role !== "MANGAGER" && role !== "USER"
       ? [
           {

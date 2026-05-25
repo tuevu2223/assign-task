@@ -2,6 +2,7 @@ import express from "express";
 import {
   getTasks,
   getMyTasks,
+  getAssignedTasks,
   getTaskById,
   createTask,
   updateTask,
@@ -90,6 +91,36 @@ router.get("/tasks", authorizeRoles("ADMIN", "MANAGER", "USER"), getTasks);
  *         description: List of tasks assigned to the user
  */
 router.get("/tasks/my-tasks", authorizeRoles("ADMIN", "MANAGER", "USER"), getMyTasks);
+
+/**
+ * @swagger
+ * /tasks/assigned:
+ *   get:
+ *     summary: Get tasks created by current user and assigned to other users
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [TODO, IN_PROGRESS, DONE]
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [LOW, MEDIUM, HIGH]
+ *       - in: query
+ *         name: search
+ *         description: Search by title
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of assigned tasks
+ */
+router.get("/tasks/assigned", authorizeRoles("ADMIN", "MANAGER"), getAssignedTasks);
 
 /**
  * @swagger
@@ -186,6 +217,10 @@ router.get("/tasks/:id", validate(objectIdParamSchema), getTaskById);
  *                 enum: [LOW, MEDIUM, HIGH]
  *               assignedTo:
  *                 type: string
+ *               deadline:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Deadline by which the task must be completed
  *     responses:
  *       201:
  *         description: Task created
@@ -232,6 +267,10 @@ router.post(
  *                 enum: [LOW, MEDIUM, HIGH]
  *               assignedTo:
  *                 type: string
+ *               deadline:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Deadline by which the task must be completed
  *     responses:
  *       200:
  *         description: Task updated

@@ -22,6 +22,8 @@ import MyTaskPage from "./pages/MyTaskPage";
 import NotifyPage from "./pages/NotifyPage";
 import SettingPage from "./pages/SettingPage";
 import TasksPage from "./pages/TasksPage";
+import EditTaskPage from "./pages/EditTaskPage";
+import AssignedTask from "./pages/AssignedTask";
 
 const router = createBrowserRouter([
   {
@@ -63,6 +65,15 @@ const router = createBrowserRouter([
             path: "/notify",
             element: <NotifyPage />,
           },
+          {
+            path: "/edit-task/:id",
+            element: <EditTaskPage />,
+          },
+          {
+            path: "/assigned-task",
+            element: <AssignedTask />,
+          },
+          
         ],
       },
     ],
